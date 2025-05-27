@@ -40,12 +40,6 @@ public class Game {
     private List<GameMovement> playerMoves = new ArrayList<>();
     private List<GameMovement> dealerMoves = new ArrayList<>();
 
-    public Game(long playerId, List<Card> deckCards) {
-        this.playerId = playerId;
-        this.deckCards = deckCards;
-        this.id = null;
-    }
-
     public void addBet(Double bet){
       this.totalBet += bet;
     }

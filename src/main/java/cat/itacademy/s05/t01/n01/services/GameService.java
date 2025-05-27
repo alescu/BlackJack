@@ -1,6 +1,7 @@
 package cat.itacademy.s05.t01.n01.services;
 
 import cat.itacademy.s05.t01.n01.business.BlackJackBussines;
+import cat.itacademy.s05.t01.n01.business.GameOptions;
 import cat.itacademy.s05.t01.n01.dto.PlayerMoveDTO;
 import cat.itacademy.s05.t01.n01.model.Card;
 import cat.itacademy.s05.t01.n01.model.Game;
@@ -36,11 +37,7 @@ public class GameService {
     public Mono<Game> getGameById(String gameId) {
         return gameRepository.findById(gameId);
     }
-    /*
-        public Mono<Game> getGameById(String gameId) {
-            return gameRepository.findPlayerGameById(gameId);
-        }
-    */
+
     public Mono<Boolean> deleteGame(String gameId) {
         return gameRepository.findById(gameId)
                 .flatMap(gameToDelete -> gameRepository.delete(gameToDelete)
@@ -100,7 +97,7 @@ public class GameService {
                 .switchIfEmpty(Mono.error(new NoSuchElementException("Jugador no trobat: " + playerName)))
                 .flatMap(player -> {
 
-                    if(player.getAccount()<5.0){
+                    if (player.getAccount() < GameOptions.MINIMAL_BET) {
                         return Mono.error(new IllegalStateException("El saldo del jugador és insuficient."));
                     }
 
@@ -108,7 +105,7 @@ public class GameService {
                             .switchIfEmpty(Mono.error(new NoSuchElementException("Joc no trobat amb ID: " + dto.getGameId())))
                             .flatMap(game -> {
 
-                                if(game.getResultCode()!=0) {
+                                if (game.getResultCode() != 0) {
                                     return Mono.error(new IllegalStateException("Aquesta partida ja s'ha acabat"));
                                 }
 
@@ -116,16 +113,16 @@ public class GameService {
                                     return Mono.error(new IllegalStateException("No queden cartes a la baralla."));
                                 }
 
-                                if(!player.getId().equals(game.getPlayerId())){
+                                if (!player.getId().equals(game.getPlayerId())) {
                                     return Mono.error(new IllegalStateException("Aquesta partida no pertany al jugador."));
                                 }
 
-                                if(player.getAccount()<dto.getBet()){
+                                if (player.getAccount() < dto.getBet()) {
                                     return Mono.error(new IllegalStateException("El saldo del jugador és inferior a la seva aposta."));
                                 }
 
                                 GameMovement playerMove;
-                                if ("C".equals(dto.getMoveType())) {
+                                if (GameOptions.HIT.equals(dto.getMoveType())) {
                                     Card nextCard = game.getDeckCards().removeFirst();
                                     game.getCardsReceived().add(nextCard);
                                     int cardValue = blackJackBussines.getCardValue(nextCard.getName(), game.getPlayerPoints());
@@ -138,17 +135,17 @@ public class GameService {
                                             .totalPoints(game.getPlayerPoints() + cardValue)
                                             .deckCardsHashCode(game.getDeckCards().hashCode())
                                             .build();
-                                    game.setPlayerPoints(game.getPlayerPoints()+cardValue);
+                                    game.setPlayerPoints(game.getPlayerPoints() + cardValue);
                                     game.getPlayerMoves().add(playerMove);
                                     game.addBet(dto.getBet());
                                     player.setAccount(player.getAccount() - dto.getBet());
 
-                                    if(game.getPlayerPoints()>21){
+                                    if (game.getPlayerPoints() > 21) {
                                         game.setResultMessage("YOU LOSS");
                                         game.setResultCode(1);
                                     }
 
-                                }else {
+                                } else if (GameOptions.STAND.equals(dto.getMoveType())) {
                                     playerMove = GameMovement.builder()
                                             .id(game.getPlayerMoves().size())
                                             .moveType(dto.getMoveType())
@@ -157,18 +154,20 @@ public class GameService {
                                     game.addBet(dto.getBet());
                                     blackJackBussines.generateDealerMovements(game);
 
+                                } else {
+                                    return Mono.error(new IllegalStateException("El saldo del jugador és inferior a la seva aposta."));
                                 }
 
-                                if(game.getResultCode()==1){
+                                if (game.getResultCode() == 1) {
                                     game.setResultMessage("La banca guanya");
                                     player.addLostGame();
-                                }else if((game.getResultCode()==2)){
+                                } else if ((game.getResultCode() == 2)) {
                                     game.setResultMessage("Empat");
                                     player.addProfit(game.getTotalBet());
                                     player.addDrawGame();
-                                }else if((game.getResultCode()==3)){
+                                } else if ((game.getResultCode() == 3)) {
                                     game.setResultMessage("La banca perd");
-                                    player.addProfit(game.getTotalBet()*2);
+                                    player.addProfit(game.getTotalBet() * 2);
                                     player.addWinGame();
                                 }
 
@@ -181,62 +180,6 @@ public class GameService {
                 });
     }
 
-
-    /* Funciona però sense guardar el player
-    public Mono<Game> createPlayerNewMovement(String playerName, PlayerMoveDTO dto) {
-        // C -> nova carta
-        // P -> plantar-se
-        return getGameById(dto.getGameId()).flatMap(_game -> {
-
-            Card nextCard = _game.getDeckCards().removeFirst();
-
-            PlayerMovement playerMove = PlayerMovement.builder()
-                    .id(_game.getPlayerMoves().size())
-                    .moveType(dto.getMoveType())
-                    .bet(dto.getBet())
-                    .cardName(nextCard.getName())
-                    .build();
-
-            _game.getCardsReceived().add(nextCard);
-            _game.getPlayerMoves().add(playerMove);
-
-            return playerService.getPlayerRepository().save(player) // Primer guardem el jugador
-                    .flatMap(updatedPlayer -> {
-                        // Un cop el jugador està guardat, guardem el joc
-                        return gameRepository.save(game); // Això retorna Mono<Game>
-                    });
-        });
-
-        return playerService.getPlayerByName(playerName)
-                .flatMap(player -> {
-                    Mono<List<Card>> shuffledCardsMono = cardService.getShuffledCardsListMono();
-                    return shuffledCardsMono.flatMap(deckCards -> {
-                        PlayerMovement playerMove = new PlayerMovement(playerMoveDto);
-                        List<Card> gamedCards = new ArrayList<>();
-                        gamedCards.add(deckCards.getFirst());
-                        Mono<Game> playerGame = gameRepository.findPlayerGameById(playerMoveDto.getGameId());
-                        playerGame.flatMap(_playerGame -> {
-                            _playerGame.getPlayerMoves().add(playerMove);
-                            return Mono.just(_playerGame).flatMap(gameRepository::save);
-                        });
-
-                        playerService.getPlayerByName(playerName).flatMap(
-                                _player -> {
-                                    System.out.println("Compte inicial: " + _player.getAccount());
-                                    _player.setAccount(_player.getAccount() - playerMoveDto.getBet());
-                                    System.out.println("Aposta: " + playerMoveDto.getBet());
-                                    System.out.println("Compte restant: " + _player.getAccount());
-                                    return Mono.just(_player);
-                                });
-
-                        return playerGame;
-                    });
-                });
-
-                    }
-                */
-
-
     public Mono<Game> saveGame(Game game) {
 
         return gameRepository.findById(game.getId()).flatMap(savedGame -> {
@@ -245,7 +188,6 @@ public class GameService {
             return Mono.just(savedGame).flatMap(gameRepository::save);
         });
     }
-
 
     public Mono<List<Card>> getFirstCardAsNewList(Mono<List<Card>> monoCardList) {
         return monoCardList.map(shuffledCards -> {
@@ -260,19 +202,5 @@ public class GameService {
     public Mono<Optional<Card>> getFirstCardOptional(Mono<List<Card>> monoCardList) {
         return monoCardList.map(shuffledCards -> shuffledCards.isEmpty() ? Optional.empty() : Optional.of(shuffledCards.get(0)));
     }
-/*
-    public Flux<Game> getPlayerGames(String playerName) {
-        Mono<Player> player = playerService.getPlayerByName(playerName);
-        return gameRepository.findPlayerGamesByName(playerName);
-    }
 
-    public Mono<Game> updateGame(String id, ArrayList<Card> cardsReceived, ArrayDeque<Card> deckCards) {
-        return gameRepository.findById(id)
-                .flatMap(gameItem -> {
-                    gameItem.setDeckCards(deckCards);
-                    gameItem.setCardsReceived(cardsReceived);
-                    return gameRepository.save(gameItem);
-                });
-    }
-    */
 }

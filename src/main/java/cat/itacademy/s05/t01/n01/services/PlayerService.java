@@ -7,6 +7,7 @@ import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Data
@@ -41,6 +42,23 @@ public class PlayerService {
                     return playerRepository.save(newPlayer);
                 }))
                 .doOnNext(player -> logger.info("Retornant jugador: {}", player.getPlayerName()));
+    }
+
+    public Mono<Player> getPlayerById(Long id) {
+        return playerRepository.findPlayerById(id)
+                .doOnSuccess(player -> {
+                    if (player != null) {
+                        logger.info("Jugador trobat amb ID {}: {}", id, player.getPlayerName());
+                    } else {
+                        logger.warn("No s'ha trobat cap jugador amb ID: {}", id);
+                    }
+                }).doOnError(e -> logger.error("Error obtenint tots els jugadors: {}", e.getMessage()));
+    }
+
+    public Flux<Player> getAllPlayers() {
+        return playerRepository.findAll()
+                .doOnComplete(() -> logger.info("Retornats tots els jugadors."))
+                .doOnError(e -> logger.error("Error obtenint tots els jugadors: {}", e.getMessage()));
     }
 
 }

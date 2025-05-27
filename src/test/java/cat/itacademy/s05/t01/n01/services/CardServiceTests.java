@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit4.SpringRunner;
 import reactor.core.publisher.Flux;
@@ -21,6 +22,7 @@ import java.util.Random;
 
 @RunWith(SpringRunner.class)
 @DataR2dbcTest
+@Import(CardService.class)
 public class CardServiceTests {
 
     @Autowired
@@ -33,18 +35,5 @@ public class CardServiceTests {
                 .expectNextCount(52)
                 .verifyComplete();
     }
-
-    /*
-    @Test
-    public void getShuffledCardsListMono() {
-         cardRepository.findAll()
-                .collectList()
-                .map(cards -> {
-                    List<Card> mutableCards = new ArrayList<>(cards);
-                    Collections.shuffle(mutableCards, new Random());
-                    return mutableCards;
-                });
-    }
-    */
 
 }

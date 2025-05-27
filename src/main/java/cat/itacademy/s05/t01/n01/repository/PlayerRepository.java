@@ -8,4 +8,7 @@ import reactor.core.publisher.Mono;
 public interface PlayerRepository extends ReactiveCrudRepository<Player, Integer> {
     @Query("select * from players where player_name=:name")
     Mono<Player> findPlayerByName(String name);
+
+    @Query("select * from players where id=:id")
+    Mono<Player> findPlayerById(Long id);
 }
