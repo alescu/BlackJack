@@ -16,7 +16,31 @@ public class Player {
     private String playerName;
     private double account;
     private double profitBalance;
-    private int gamesStarted;
-    private int gamesWon;
-    private int gamesLost;
+    private Integer gamesStarted = 0;
+    private Integer gamesWon = 0;
+    private Integer gamesLost = 0;
+    private Integer gamesDraw = 0;
+
+    public void addGameStarted(){
+        this.gamesStarted++;
+    }
+
+    public void addLostGame(){
+        this.gamesLost++;
+    }
+
+    public void addWinGame(){
+        this.gamesWon++;
+    }
+
+    public void addDrawGame(){
+        this.gamesDraw++;
+    }
+
+    public void addProfit(Double account){
+        this.account += account;
+    }
+
+
+
 }

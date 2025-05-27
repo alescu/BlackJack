@@ -16,15 +16,13 @@ import java.util.Random;
 @Service
 public class CardService {
 
-
-    private final Random random = new Random();
     private CardRepository cardRepository;
 
     CardService(CardRepository cardRepository){
         this.cardRepository = cardRepository;
     }
 
-    private Flux<Card> getCardsListMono() {
+    public Flux<Card> getCardsListMono() {
         return getCardRepository().findAll();
     }
 
@@ -33,7 +31,7 @@ public class CardService {
                 .collectList()
                 .map(cards -> {
                     List<Card> mutableCards = new ArrayList<>(cards);
-                    Collections.shuffle(mutableCards, random);
+                    Collections.shuffle(mutableCards, new Random());
                     return mutableCards;
                 });
     }

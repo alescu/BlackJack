@@ -1,5 +1,6 @@
 package cat.itacademy.s05.t01.n01.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
@@ -8,7 +9,6 @@ import org.springframework.data.domain.Persistable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -26,21 +26,18 @@ public class Card implements Persistable<Integer> {
     @Column("type")
     private String type;
 
-    @Column("date_reg")
-    private LocalDateTime dateReg;
-
-    @Column("date_modify")
-    private LocalDateTime dateModify;
-
     @Transient
+    @JsonIgnore
     private boolean newCard;
 
     @Override
+    @JsonIgnore
     public boolean isNew() {
         return newCard || getId() == null;
     }
 
     @Override
+    @JsonIgnore
     public Integer getId() {
         return this.id;
     }

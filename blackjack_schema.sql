@@ -10,7 +10,8 @@ CREATE TABLE players (
 	profit_balance decimal (5, 2) NOT NULL DEFAULT '0',
 	games_started int(11) NOT NULL DEFAULT '0',
 	games_won int(11) NOT NULL DEFAULT '0',
-	games_lost int(11) NOT NULL DEFAULT '0',		
+	games_lost int(11) NOT NULL DEFAULT '0',
+	games_draw int(11) NOT NULL DEFAULT '0',	
 	date_reg timestamp NOT NULL DEFAULT current_timestamp(),	
     date_modify timestamp NULL DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

@@ -15,7 +15,7 @@ public class PlayerController {
     @Autowired
     private PlayerService playerServices;
 
-    @PostMapping("/new")
+    @PostMapping("")
     public ResponseEntity<Mono<Player>> newPlayer(@RequestBody Player newPlayer){
         System.out.println("name = " + newPlayer.getPlayerName());
         return ResponseEntity.status(HttpStatus.CREATED).body(playerServices.setNewPlayer(newPlayer));

@@ -1,7 +1,7 @@
 package cat.itacademy.s05.t01.n01.controllers;
 
 import cat.itacademy.s05.t01.n01.dto.PlayerMoveDTO;
-import cat.itacademy.s05.t01.n01.model.PlayerGame;
+import cat.itacademy.s05.t01.n01.model.Game;
 import cat.itacademy.s05.t01.n01.repository.CardRepository;
 import cat.itacademy.s05.t01.n01.services.GameService;
 import cat.itacademy.s05.t01.n01.services.PlayerService;
@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,22 +27,17 @@ public class GameController {
     @Autowired
     private PlayerService playerService;
 
-    @GetMapping("/{playerName}")
-    public ResponseEntity<Mono<PlayerGame>> newGame(@PathVariable String playerName){
+    @PostMapping("/{playerName}")
+    public ResponseEntity<Mono<Game>> newGame(@PathVariable String playerName){
         System.out.println("playerName = " + playerName);
-        Mono<PlayerGame> playerGames = gameService.createPlayerNewGame(playerName);
+        Mono<Game> playerGames = gameService.createPlayerNewGame(playerName);
         System.out.println("carregat = " + playerName);
         return ResponseEntity.status(HttpStatus.CREATED).body(playerGames);
     }
 
-    @PostMapping("/play/{id}")
-    public Mono<ResponseEntity<Mono<PlayerGame>>> playMove(@PathVariable String id, @RequestBody PlayerMoveDTO playerMove) {
-        // String orderType, double amount
-        // Cal mirar si l'usuari ja és a la bd.
-        // CAl mirar si té partida coemençada? o sols es guarden quan has acabat?
-        // Carta, Separar, Plantarse
-
-        return Mono.just(ResponseEntity.status(HttpStatus.OK).body(gameService.getGameById(id)));
+    @PostMapping("/{playerName}/play")
+    public ResponseEntity<Mono<Game>> setPlayerMove(@PathVariable String playerName, @RequestBody PlayerMoveDTO playerMoveDto) {
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.createPlayerNewMovement(playerName, playerMoveDto));
     }
 
     @DeleteMapping("/{id}")
