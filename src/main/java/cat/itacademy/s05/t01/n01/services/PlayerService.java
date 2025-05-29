@@ -1,6 +1,8 @@
 package cat.itacademy.s05.t01.n01.services;
 
+import cat.itacademy.s05.t01.n01.business.GameOptions;
 import cat.itacademy.s05.t01.n01.controllers.GameController;
+import cat.itacademy.s05.t01.n01.exception.BlackJackGameException;
 import cat.itacademy.s05.t01.n01.model.Player;
 import cat.itacademy.s05.t01.n01.repository.PlayerRepository;
 import lombok.Data;
@@ -25,11 +27,28 @@ public class PlayerService {
         logger.info("Rebuda petició /new per al jugador: {}", paramPlayer.getPlayerName());
 
         return playerRepository.findPlayerByName(paramPlayer.getPlayerName())
+                .flatMap(existingPlayer -> {
+                    logger.warn("El jugador amb nom '{}' ja existeix. No es pot crear un de nou.", paramPlayer.getPlayerName());
+                    return Mono.<Player>error(new BlackJackGameException("El jugador amb nom '" + paramPlayer.getPlayerName() + "' ja existeix."));
+                })
                 .switchIfEmpty(Mono.defer(() -> {
                     logger.info("Creant nou jugador: {}", paramPlayer.getPlayerName());
-                    return playerRepository.save(paramPlayer);
+
+                    Double accountInitial = paramPlayer.getAccount();
+
+                    if(GameOptions.INITIAL_ACOUNT>accountInitial){
+                        return Mono.error(new BlackJackGameException("La aportació inicial ha de ser major de " + GameOptions.INITIAL_ACOUNT));
+                    }
+
+                    Player newPlayer = new Player(paramPlayer.getPlayerName());
+                    newPlayer.setAccount(accountInitial);
+                    newPlayer.setGamesWon(0);
+                    newPlayer.setGamesLost(0);
+                    return playerRepository.save(newPlayer);
                 }))
-                .doOnNext(player -> logger.info("Retornant jugador: {}", player.getPlayerName()));
+                .doOnNext(player -> {
+                    logger.info("Jugador '{}' creat amb èxit.", player.getPlayerName());
+                });
     }
 
     public Mono<Player> getPlayerByName(String playerName) {
@@ -52,13 +71,35 @@ public class PlayerService {
                     } else {
                         logger.warn("No s'ha trobat cap jugador amb ID: {}", id);
                     }
-                }).doOnError(e -> logger.error("Error obtenint tots els jugadors: {}", e.getMessage()));
+                })
+                .switchIfEmpty(Mono.error(new BlackJackGameException("Jugador amb ID " + id + " no trobat.")))
+                .doOnError(e -> logger.error("Error obtenint el jugador: {}", e.getMessage()));
     }
 
     public Flux<Player> getAllPlayers() {
         return playerRepository.findAll()
                 .doOnComplete(() -> logger.info("Retornats tots els jugadors."))
                 .doOnError(e -> logger.error("Error obtenint tots els jugadors: {}", e.getMessage()));
+    }
+
+    public Flux<Player> getAllPlayersByProfit() {
+        return playerRepository.findPlayersByProfit()
+                .doOnComplete(() -> logger.info("Retornats tots els jugadors."))
+                .doOnError(e -> logger.error("Error obtenint tots els jugadors: {}", e.getMessage()));
+    }
+
+    public Mono<Player> updatePlayerAccount(Long id, Double accountValue) {
+        logger.info("Actualitzant compte del jugador amb ID {}. Nou valor: {}", id, accountValue);
+
+        return playerRepository.findPlayerById(id)
+                .flatMap(player -> {
+                    Double newValue = player.getAccount() + accountValue;
+                    player.setAccount(newValue);
+                    return playerRepository.save(player);
+                })
+                .doOnSuccess(player -> logger.info("Compte del jugador {} actualitzat correctament.", player.getPlayerName()))
+                .doOnError(e -> logger.error("Error actualitzant compte del jugador amb ID {}: {}", id, e.getMessage()))
+                .switchIfEmpty(Mono.error(new BlackJackGameException("Jugador amb ID " + id + " no trobat.")));
     }
 
 }

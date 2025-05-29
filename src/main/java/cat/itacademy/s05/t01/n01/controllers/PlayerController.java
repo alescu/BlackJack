@@ -26,9 +26,19 @@ public class PlayerController {
         return ResponseEntity.status(HttpStatus.OK).body(playerServices.getAllPlayers());
     }
 
+    @GetMapping("/getPlayersByProfit")
+    public ResponseEntity<Flux<Player>> getPlayersByProfit(){
+        return ResponseEntity.status(HttpStatus.OK).body(playerServices.getAllPlayersByProfit());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Mono<Player>> getPlayerById(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.CREATED).body(playerServices.getPlayerById(id));
+    }
+
+    @PostMapping("/addAccount/{id}")
+    public ResponseEntity<Mono<Player>> updatePlayerAccount(@PathVariable Long id, @RequestBody Double accountValue){
+        return ResponseEntity.status(HttpStatus.CREATED).body(playerServices.updatePlayerAccount(id, accountValue));
     }
 
 }

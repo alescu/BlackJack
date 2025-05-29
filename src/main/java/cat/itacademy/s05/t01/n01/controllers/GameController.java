@@ -41,8 +41,13 @@ public class GameController {
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Mono<Boolean>>> deleteGame(@PathVariable String id) {
-        return Mono.just(ResponseEntity.status(HttpStatus.NO_CONTENT).body(gameService.deleteGame(id)));
+    public ResponseEntity<Mono<Boolean>> deleteGame(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(gameService.deleteGame(id));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Mono<Game>> getGame(@PathVariable String id) {
+        return ResponseEntity.status(HttpStatus.OK).body(gameService.getGameById(id));
     }
 
 }

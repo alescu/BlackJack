@@ -38,9 +38,7 @@ public class Player {
     }
 
     public void addProfit(Double account){
-        this.account += account;
+        this.profitBalance += account;
     }
-
-
 
 }

@@ -6,5 +6,6 @@ public class GameOptions {
     public static final String STAND = "S";
 
     public static final Double MINIMAL_BET = 5.0;
+    public static final Double INITIAL_ACOUNT = 100.0;
 
 }

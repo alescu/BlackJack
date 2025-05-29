@@ -3,7 +3,6 @@ package cat.itacademy.s05.t01.n01.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @NoArgsConstructor

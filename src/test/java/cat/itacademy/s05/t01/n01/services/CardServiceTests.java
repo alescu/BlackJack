@@ -36,4 +36,18 @@ public class CardServiceTests {
                 .verifyComplete();
     }
 
+    @Test
+    public void getShuffledCardsListMono() {
+        Mono<List<Card>> cardsFlux_1 = cardService.getShuffledCardsListMono();
+        Mono<List<Card>> cardsFlux_2 = cardService.getShuffledCardsListMono();
+        Mono<Object[]> combinedShuffles = Mono.zip(cardsFlux_1, cardsFlux_2).map(t -> new Object[]{t.getT1(), t.getT2()});
+        StepVerifier.create(combinedShuffles).expectNextMatches( result -> {
+            @SuppressWarnings("unchecked")
+            List<Card> list1 = (List<Card>) result[0];
+            @SuppressWarnings("unchecked")
+            List<Card> list2 = (List<Card>) result[1];
+            return !list1.getFirst().equals(list2.getFirst());
+        }).verifyComplete();
+    }
+
 }

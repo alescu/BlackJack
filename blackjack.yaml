@@ -1,0 +1,152 @@
+# Defineix la versió d'OpenAPI Specification (actualment 3.0.x o 3.1.x)
+swagger: "2.0"
+
+# Informació bàsica sobre la teva API
+info:
+  title: BlackJackGame API
+  description: Una descripció breu i concisa de la funcionalitat de la teva API.
+  version: 1.0.0 # La versió de la teva API
+  contact:
+    name: El Teu Nom o Equip
+    url: http://www.example.com/support # URL de suport o contacte
+    email: support@example.com
+  license:
+    name: Apache 2.0 # Tipus de llicència
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# Defineix els servidors on es pot accedir a la teva API
+servers:
+  - url: http://localhost:8080/
+    description: Servidor de desenvolupament local
+  - url: http://localhost:8080/
+    description: Servidor de producció
+
+# Defineix els paths (endpoints) i les operacions HTTP
+paths:
+  /player: 
+    get: 
+      summary: Obtenir tots els usuaris
+      description: Retorna una llista de tots els usuaris registrats.
+      operationId: getAllUsers
+      tags:
+        - Usuaris
+      responses: # Defineix les respostes HTTP possibles
+        '200': # Codi d'estat HTTP 200 OK
+          description: Llista d'usuaris retornada amb èxit.
+          content:
+            application/json: # Tipus de contingut de la resposta
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User' # Referència a un esquema de User definit a components
+        '500':
+          description: Error intern del servidor.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post: 
+      summary: Crear un nou usuari
+      description: Afegeix un nou usuari al sistema.
+      operationId: createUser
+      tags:
+        - Usuaris
+      requestBody: 
+        description: Dades de l'usuari a crear.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '{
+                    "playerName": "albert3",
+                    "id": 3,
+                    "account": 100.0,
+                    "profitBalance": 0.0,
+                    "gamesStarted": 0,
+                    "gamesWon": 0,
+                    "gamesLost": 0,
+                    "gamesDraw": 0
+                }'
+      responses:
+        '201': # Codi d'estat HTTP 201 Created
+          description: Usuari creat amb èxit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Dades d'entrada invàlides.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /player/{id}: 
+    parameters: 
+      - name: id
+        in: path 
+        description: L'ID únic de l'usuari.
+        required: true
+        schema:
+          type: string # O integer, depenent del tipus del teu ID
+          format: uuid # Si és un UUID
+    get:
+      summary: Obtenir usuari per ID
+      description: Retorna un usuari específic basant-se en el seu ID.
+      operationId: getUserById
+      tags:
+        - Usuaris
+      responses:
+        '200':
+          description: Usuari retornat amb èxit.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Usuari no trobat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas: 
+    User: 
+      type: object
+      properties:
+        id:
+          type: long
+          format: uuid
+          example: d290f1ee-6c54-4b01-90e6-d701748f0851
+        name:
+          type: string
+          example: Joan Garcia
+      required:
+        - id
+        - playerName
+
+    NewUser: 
+      type: object
+      properties:
+        name:
+          type: string
+          example: Anna Llop
+      required:
+        - playerName
+
+    ErrorResponse: # Esquema per a respostes d'error
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: 400
+        message:
+          type: string
+          example: "Dades d'entrada invàlides."
+      required:
+        - code
+        - message
+
