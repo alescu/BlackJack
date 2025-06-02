@@ -1,12 +1,11 @@
 package cat.itacademy.s05.t01.n01.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Data
+@NoArgsConstructor
 @RequiredArgsConstructor
 @Table("players")
 public class Player {
@@ -37,8 +36,16 @@ public class Player {
         this.gamesDraw++;
     }
 
-    public void addProfit(Double account){
-        this.profitBalance += account;
+    public void addProfit(Double balance){
+        this.profitBalance += balance;
     }
 
+    public void addAccount(Double account){
+        this.account += account;
+    }
+
+    public Player(Long id, @NonNull String playerName) {
+        this.id = id;
+        this.playerName = playerName;
+    }
 }

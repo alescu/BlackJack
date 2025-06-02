@@ -1,12 +1,13 @@
 package cat.itacademy.s05.t01.n01.services;
 
-import cat.itacademy.s05.t01.n01.business.BlackJackBussines;
+import cat.itacademy.s05.t01.n01.business.BlackJackBusiness;
 import cat.itacademy.s05.t01.n01.business.GameOptions;
 import cat.itacademy.s05.t01.n01.dto.PlayerMoveDTO;
 import cat.itacademy.s05.t01.n01.exception.BlackJackGameException;
 import cat.itacademy.s05.t01.n01.model.Card;
 import cat.itacademy.s05.t01.n01.model.Game;
 import cat.itacademy.s05.t01.n01.model.GameMovement;
+import cat.itacademy.s05.t01.n01.model.Player;
 import cat.itacademy.s05.t01.n01.repository.GameRepository;
 import lombok.Data;
 import org.springframework.stereotype.Service;
@@ -26,9 +27,9 @@ public class GameService {
     private final GameRepository gameRepository;
     private final PlayerService playerService;
     private final CardService cardService;
-    private final BlackJackBussines blackJackBussines;
+    private final BlackJackBusiness blackJackBussines;
 
-    GameService(GameRepository gameRepository, PlayerService playerService, CardService cardService, BlackJackBussines blackJackBussines) {
+    GameService(GameRepository gameRepository, PlayerService playerService, CardService cardService, BlackJackBusiness blackJackBussines) {
         this.gameRepository = gameRepository;
         this.playerService = playerService;
         this.cardService = cardService;
@@ -77,7 +78,7 @@ public class GameService {
 
                         GameMovement playerFirstMove = GameMovement.builder()
                                 .id(0)
-                                .moveType("C")
+                                .moveType(GameOptions.HIT)
                                 .bet(minimalBet)
                                 .cardName(firstCard.getName())
                                 .cardPoints(cardPoints)
@@ -89,10 +90,9 @@ public class GameService {
                         newGame.getPlayerMoves().add(playerFirstMove);
                         newGame.setPlayerPoints(cardPoints);
 
-                        player.addProfit(-minimalBet);
                         player.addGameStarted();
-                        player.setAccount(player.getAccount() - minimalBet);
-                        player.addProfit(- minimalBet);
+                        player.addAccount(-minimalBet);
+                        player.addProfit(-minimalBet);
 
                         return playerService.getPlayerRepository().save(player)
                                 .flatMap(updatedPlayer -> {
@@ -155,7 +155,7 @@ public class GameService {
                                     game.setPlayerPoints(game.getPlayerPoints() + cardValue);
                                     game.getPlayerMoves().add(playerMove);
                                     game.addBet(dto.getBet());
-                                    player.setAccount(player.getAccount() - dto.getBet());
+                                    player.addAccount(- dto.getBet());
                                     player.addProfit(- dto.getBet());
                                     if (game.getPlayerPoints() > 21) {
                                         game.setResultMessage("YOU LOSS");
@@ -169,25 +169,16 @@ public class GameService {
                                             .build();
                                     game.getPlayerMoves().add(playerMove);
                                     game.addBet(dto.getBet());
+                                    player.addAccount(- dto.getBet());
+                                    player.addProfit(- dto.getBet());
+
                                     blackJackBussines.generateDealerMovements(game);
 
                                 } else {
                                     return Mono.error(new BlackJackGameException("El saldo del jugador és inferior a la seva aposta."));
                                 }
 
-                                if (game.getResultCode() == 1) {
-                                    game.setResultMessage("La banca guanya");
-                                    player.addLostGame();
-                                } else if ((game.getResultCode() == 2)) {
-                                    game.setResultMessage("Empat");
-                                    player.addProfit(game.getTotalBet());
-                                    player.addDrawGame();
-                                } else if ((game.getResultCode() == 3)) {
-                                    game.setResultMessage("La banca perd");
-                                    player.addProfit(game.getTotalBet() * 2);
-                                    player.addWinGame();
-                                    player.addProfit(dto.getBet() * 2);
-                                }
+                                blackJackBussines.resolveGame(player, game);
 
                                 return playerService.getPlayerRepository().save(player)
                                         .flatMap(updatedPlayer -> {
@@ -198,28 +189,4 @@ public class GameService {
                 });
     }
 
-    /*
-    public Mono<Game> saveGame(Game game) {
-
-        return gameRepository.findById(game.getId()).flatMap(savedGame -> {
-            //List<Card> deckCards = savedGame.getDeckCards();
-            savedGame.getDeckCards().add(savedGame.getDeckCards().getFirst());
-            return Mono.just(savedGame).flatMap(gameRepository::save);
-        });
-    }
-
-    public Mono<List<Card>> getFirstCardAsNewList(Mono<List<Card>> monoCardList) {
-        return monoCardList.map(shuffledCards -> {
-            Card firstCard = shuffledCards.get(0);
-            System.out.println("Primera carta obtinguda: " + firstCard);
-            List<Card> newList = new ArrayList<>();
-            newList.add(firstCard);
-            return newList;
-        });
-    }
-
-    public Mono<Optional<Card>> getFirstCardOptional(Mono<List<Card>> monoCardList) {
-        return monoCardList.map(shuffledCards -> shuffledCards.isEmpty() ? Optional.empty() : Optional.of(shuffledCards.get(0)));
-    }
-*/
 }

@@ -63,19 +63,6 @@ public class PlayerService {
                 .doOnNext(player -> logger.info("Retornant jugador: {}", player.getPlayerName()));
     }
 
-    public Mono<Player> getPlayerById(Long id) {
-        return playerRepository.findPlayerById(id)
-                .doOnSuccess(player -> {
-                    if (player != null) {
-                        logger.info("Jugador trobat amb ID {}: {}", id, player.getPlayerName());
-                    } else {
-                        logger.warn("No s'ha trobat cap jugador amb ID: {}", id);
-                    }
-                })
-                .switchIfEmpty(Mono.error(new BlackJackGameException("Jugador amb ID " + id + " no trobat.")))
-                .doOnError(e -> logger.error("Error obtenint el jugador: {}", e.getMessage()));
-    }
-
     public Flux<Player> getAllPlayers() {
         return playerRepository.findAll()
                 .doOnComplete(() -> logger.info("Retornats tots els jugadors."))
@@ -88,18 +75,18 @@ public class PlayerService {
                 .doOnError(e -> logger.error("Error obtenint tots els jugadors: {}", e.getMessage()));
     }
 
-    public Mono<Player> updatePlayerAccount(Long id, Double accountValue) {
-        logger.info("Actualitzant compte del jugador amb ID {}. Nou valor: {}", id, accountValue);
+    public Mono<Player> updatePlayerAccount(String playerName, Double accountValue) {
+        logger.info("Actualitzant compte del jugador amb nom {}. Nou valor: {}", playerName, accountValue);
 
-        return playerRepository.findPlayerById(id)
+        return playerRepository.findPlayerByName(playerName)
                 .flatMap(player -> {
                     Double newValue = player.getAccount() + accountValue;
                     player.setAccount(newValue);
                     return playerRepository.save(player);
                 })
                 .doOnSuccess(player -> logger.info("Compte del jugador {} actualitzat correctament.", player.getPlayerName()))
-                .doOnError(e -> logger.error("Error actualitzant compte del jugador amb ID {}: {}", id, e.getMessage()))
-                .switchIfEmpty(Mono.error(new BlackJackGameException("Jugador amb ID " + id + " no trobat.")));
+                .doOnError(e -> logger.error("Error actualitzant compte del jugador amb nom {}: {}", accountValue, e.getMessage()))
+                .switchIfEmpty(Mono.error(new BlackJackGameException("Jugador amb nom " + accountValue + " no trobat.")));
     }
 
 }

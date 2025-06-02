@@ -20,8 +20,6 @@ The player can initialize directly by opening a new game, in this case his initi
 Once the game has begun, the player praises a letter and will have to choose between asking for a letter with Hit or 's stay with what he has and to give way to the game of banking.
 
 
-
-
 For administrative needs, there are endpoints to find specific games or delete them by ID, ensuring full control over game sessions.
 
 * Player endpoints
@@ -31,9 +29,9 @@ For administrative needs, there are endpoints to find specific games or delete t
 		*-* Get all players in game
     * Get "/getPlayersProfit"
 		*-* Get all players in game by profit order
-    * Get "/{id}"
-		*-* Get player for their id
-    * Post "/addAccount/{id}"
+    * Get "/{playerName }"
+		*-* Get player for their name
+    * Post "/{playerName}/addAccount"
 		*-* Add credit to the user's account
 
 * Game endpoints**
@@ -57,11 +55,12 @@ For administrative needs, there are endpoints to find specific games or delete t
 * log4j 2.24
 * GitHub
 * Postman
+* Swagger
 * OpenAPI 3.0 specifications
 * Docker
 * DOCKER OFFICIAL IMAGEs
-	* mongo:latest FROM ubuntu:24.04			
-	* mysql:latest FROM oraclelinux:038463507f87d6444...
+	* mongo:latest FROM ubuntu:24.04						port: 27017	
+	* mysql:latest FROM oraclelinux:038463507f87d6444...  	port: 33060
 	
 ## How to run it
 
@@ -96,6 +95,20 @@ For administrative needs, there are endpoints to find specific games or delete t
 		* Simulate the notification of important events.
 		* Users can be kept personally informed by email or SMS as the case may be.
 		* **
+
+## How to build the Docker Image:
+ 
+	Open your terminal, navigate to the project's root directory (where your Dockerfile is located), and execute the following command in Bash:
+
+		"docker build -t blackjack_app:1.0 ."
+
+	With Docker version 27.2.0, build 3ab4256
+		
+		For the correct operation of the Docker application, the application ports must be mapped correctly:
+		
+			* blackjack_app  in port: 8080
+			* mongo:latest FROM ubuntu:24.04 in port: 27017	
+			* mysql:latest FROM oraclelinux:038463507f87d6444... in port: 33060
 
 ## Project Structure
 

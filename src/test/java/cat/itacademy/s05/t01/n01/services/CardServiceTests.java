@@ -5,6 +5,7 @@ import cat.itacademy.s05.t01.n01.repository.CardRepository;
 import lombok.Data;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
 import org.springframework.context.annotation.Import;

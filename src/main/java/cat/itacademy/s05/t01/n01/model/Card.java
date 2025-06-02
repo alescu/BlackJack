@@ -30,6 +30,9 @@ public class Card implements Persistable<Integer> {
     @JsonIgnore
     private boolean newCard;
 
+    public Card(Object o, String dummy, int i) {
+    }
+
     @Override
     @JsonIgnore
     public boolean isNew() {

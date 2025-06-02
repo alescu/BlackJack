@@ -1,0 +1,467 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "API S05T01N01 - BlackJack",
+    "description": "Documentació de l'API principal del projecte S05T01N01 (BlackJack).",
+    "version": "0.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/player": {
+      "get": {
+        "tags": [
+          "player-controller"
+        ],
+        "summary": "Get all players",
+        "description": "Get all players in game.",
+        "operationId": "getPlayers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Player"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "player-controller"
+        ],
+        "summary": "Add a new Player",
+        "description": "Add a new Player in game.",
+        "operationId": "newPlayer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Player"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Player"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/{playerName}/addAccount": {
+      "post": {
+        "tags": [
+          "player-controller"
+        ],
+        "summary": "Add credit to the user's account",
+        "description": "Add credit to the user's account",
+        "operationId": "updatePlayerAccount",
+        "parameters": [
+          {
+            "name": "playerName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "number",
+                "format": "double"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Player"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/{playerName}": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Open a new Game for a player",
+        "description": "Open a new Game for a player.",
+        "operationId": "newGame",
+        "parameters": [
+          {
+            "name": "playerName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Game"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/{playerName}/play": {
+      "post": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Add a play movement to Player in game",
+        "description": "Add a play movement to Player in game.",
+        "operationId": "setPlayerMove",
+        "parameters": [
+          {
+            "name": "playerName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlayerMoveDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Game"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/{playerName}": {
+      "get": {
+        "tags": [
+          "player-controller"
+        ],
+        "summary": "Get player for their name",
+        "description": "Get player for their name",
+        "operationId": "getPlayerById",
+        "parameters": [
+          {
+            "name": "playerName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Player"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/player/getPlayersByProfit": {
+      "get": {
+        "tags": [
+          "player-controller"
+        ],
+        "summary": "List of players by profit order",
+        "description": "Get all players in game by profit order",
+        "operationId": "getPlayersByProfit",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Player"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/game/{id}": {
+      "get": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Show a game by their id",
+        "description": "Show a game by their id.",
+        "operationId": "getGame",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Game"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "game-controller"
+        ],
+        "summary": "Delete a game by their id",
+        "description": "Delete a game by their id.",
+        "operationId": "deleteGame",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Player": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "playerName": {
+            "type": "string"
+          },
+          "account": {
+            "type": "number",
+            "format": "double"
+          },
+          "profitBalance": {
+            "type": "number",
+            "format": "double"
+          },
+          "gamesStarted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gamesWon": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gamesLost": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gamesDraw": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Card": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "Game": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "playerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cardsReceived": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Card"
+            }
+          },
+          "dealerCards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Card"
+            }
+          },
+          "resultMessage": {
+            "type": "string"
+          },
+          "resultCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deckCardsHashCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "playerPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dealerPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalBet": {
+            "type": "number",
+            "format": "double"
+          },
+          "resultBet": {
+            "type": "number",
+            "format": "double"
+          },
+          "playerMoves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameMovement"
+            }
+          },
+          "dealerMoves": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GameMovement"
+            }
+          }
+        }
+      },
+      "GameMovement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "moveType": {
+            "type": "string"
+          },
+          "cardName": {
+            "type": "string"
+          },
+          "cardPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPoints": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bet": {
+            "type": "number",
+            "format": "double"
+          },
+          "deckCardsHashCode": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PlayerMoveDTO": {
+        "type": "object",
+        "properties": {
+          "gameId": {
+            "type": "string"
+          },
+          "bet": {
+            "type": "number",
+            "format": "double"
+          },
+          "moveType": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
