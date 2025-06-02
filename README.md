@@ -110,6 +110,9 @@ For administrative needs, there are endpoints to find specific games or delete t
 			* mongo:latest FROM ubuntu:24.04 in port: 27017	
 			* mysql:latest FROM oraclelinux:038463507f87d6444... in port: 33060
 
+	You can download the image form GitHub Packages:  
+		"docker pull ghcr.io/alescu/blackjack_app:1.0"
+
 ## Project Structure
 
 * The project is built using Maven.
